@@ -172,6 +172,21 @@ Jig.TrivialFilter = function() {
     }
 }
 
+Jig.TeeFilter = function(filter1, filter2) {
+    return {
+        id: "tee(" + filter1.id + ", " + filter2.id + ")",
+        apply: function(solutions) {
+            var p1 = filter1.apply(solutions);
+            var p2 = filter2.apply(solutions);
+            return {
+                put: function(arg) {
+                    return p1.put(arg) && p2.put(arg);
+                }
+            }
+        }
+    }
+}
+
 /******************************************************************************/
 
 Jig.PrintPipe = function() {
@@ -257,12 +272,23 @@ Jig.Generator = function(filter) {
     }
 
     return {
-        single: function(c) {
+        e: function(c) {
+            return extend(new Jig.SingletonFilter(c));
+        },
+
+        v: function(c) {
             return extend(new Jig.SingletonFilter(c));
         },
 
         distinct: function() {
             return extend(new Jig.DistinctFilter());
+        },
+
+        // Gremlin's bothV
+        ends: function() {
+            return extend(new Jig.TeeFilter(
+                    new Jig.HeadFilter(),
+                    new Jig.TailFilter()));
         },
 
         head: function() {
@@ -273,8 +299,14 @@ Jig.Generator = function(filter) {
             return extend(new Jig.LabelFilter());
         },
 
-        limit: function(l) {
-            return extend(new Jig.LimitFilter(l));
+        limit: function(lim) {
+            return extend(new Jig.LimitFilter(lim));
+        },
+
+        bothE: function(predicate) {
+            return extend(new Jig.TeeFilter(
+                    new Jig.InEdgesFilter(predicate),
+                    new Jig.OutEdgesFilter(predicate)));
         },
 
         inE: function(predicate) {
