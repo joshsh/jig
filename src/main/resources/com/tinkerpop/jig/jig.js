@@ -81,6 +81,14 @@ Jig.InEdgesFilter = function() {
     }
 }
 
+Jig.SingletonFilter = function(c) {
+    return {
+        applyTo: function(arg, solutions) {
+            return solutions.put(c);
+        }
+    }
+}
+
 Jig.DistinctFilter = function() {
     var set = {};
 
@@ -195,6 +203,10 @@ Jig.Generator = function(filter) {
     }
 
     return {
+        single: function(c) {
+            return extend(new Jig.SingletonFilter(c));
+        },
+
         distinct: function() {
             return extend(new Jig.DistinctFilter());
         },
@@ -215,7 +227,7 @@ Jig.Generator = function(filter) {
             return extend(new Jig.InEdgesFilter());
         },
 
-        outEdges: function() {
+        outEdges: function(label) {
             return extend(new Jig.OutEdgesFilter());
         },
 
