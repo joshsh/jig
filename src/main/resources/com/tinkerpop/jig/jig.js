@@ -1,114 +1,175 @@
 var Jig = {};
 
+function pushCursor(cursor, solutions) {
+    var t = cursor.next();
+    while (null != t) {
+        if (!solutions.put(t)) {
+            cursor.close();
+            return false;
+        }
+
+        t = cursor.next();
+    }
+
+    cursor.close();
+    return true;
+}
+
+Jig.toNumber = function(r) {
+    // TODO
+    return 0;
+}
+
 /******************************************************************************/
 
 Jig.LimitFilter = function(limit) {
-    var count = 0;
-
     return {
-        applyTo: function(arg, solutions) {
-            if (count < limit) {
-                solutions.put(arg);
-                count++;
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
-}
+        id: "limit",
+        apply: function(solutions) {
+            var count = 0;
 
-Jig.CursorFilter = function(cursor) {
-    return {
-        applyTo: function(arg, solutions) {
-            var t = cursor.next();
-            while (null != t) {
-                if (!solutions.put(t)) {
-                    // TODO: close cursor
-                    return false;
+            return {
+                put: function(arg) {
+                    if (count < limit) {
+                        solutions.put(arg);
+                        count++;
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
-
-                t = cursor.next();
             }
-
-            return true;
         }
     }
 }
 
 Jig.HeadFilter = function() {
     return {
-        applyTo: function(arg, solutions) {
-            var s = arg.object;
-            return solutions.put(s);
+        id: "head",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var s = arg.object;
+                    return solutions.put(s);
+                }
+            }
         }
     }
 }
 
 Jig.TailFilter = function() {
     return {
-        applyTo: function(arg, solutions) {
-            var s = arg.subject;
-            return solutions.put(s);
+        id: "tail",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var s = arg.subject;
+                    return solutions.put(s);
+                }
+            }
         }
     }
 }
 
 Jig.LabelFilter = function() {
     return {
-        applyTo: function(arg, solutions) {
-            var s = arg.predicate;
-            return solutions.put(s);
+        id: "label",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var s = arg.predicate;
+                    return solutions.put(s);
+                }
+            }
+        }
+    }
+}
+
+Jig.TriplesFilter = function(subject, predicate, object, context) {
+    return {
+        id: "triples",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var c = store.getTriples(subject, predicate, object, context);
+                    return pushCursor(c, solutions);
+                }
+            }
         }
     }
 }
 
 Jig.OutEdgesFilter = function() {
     return {
-        applyTo: function(arg, solutions) {
-            var c = store.getTriples(arg, null, null, null);
-            return new Jig.CursorFilter(c).applyTo(null, solutions);
+        id: "outEdges",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var c = store.getTriples(arg, null, null, null);
+                    return pushCursor(c, solutions);
+                }
+            }
         }
     }
 }
 
 Jig.InEdgesFilter = function() {
     return {
-        applyTo: function(arg, solutions) {
-            var c = store.getTriples(null, null, arg, null);
-            return new Jig.CursorFilter(c).applyTo(null, solutions);
+        id: "inEdges",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var c = store.getTriples(null, null, arg, null);
+                    return pushCursor(c, solutions);
+                }
+            }
         }
     }
 }
 
 Jig.SingletonFilter = function(c) {
     return {
-        applyTo: function(arg, solutions) {
-            return solutions.put(c);
-        }
-    }
-}
-
-Jig.DistinctFilter = function() {
-    var set = {};
-
-    return {
-        applyTo: function(arg, solutions) {
-            if (set[arg]) {
-                return true;
-            } else {
-                set[arg] = true;
-                return solutions.put(arg);
+        id: "singleton",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    return solutions.put(c);
+                }
             }
         }
     }
 }
 
-/******************************************************************************/
+Jig.DistinctFilter = function() {
+    return {
+        id: "distinct",
+        apply: function(solutions) {
+            var set = {};
+            return {
+                put: function(arg) {
+                    if (set[arg]) {
+                        return true;
+                    } else {
+                        set[arg] = true;
+                        return solutions.put(arg);
+                    }
+                }
+            }
+        }
+    }
+}
 
-Jig.toNumber = function(r) {
-    // TODO
-    return 0;
+Jig.TrivialFilter = function() {
+    return {
+        id: "trivial",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    return solutions.put(arg);
+                }
+            }
+        }
+    }
 }
 
 /******************************************************************************/
@@ -167,6 +228,7 @@ Jig.CollectorPipe = function() {
         put: function(arg) {
             array[count] = arg;
             count++;
+            return true;
         },
 
         getArray: function() {
@@ -175,19 +237,11 @@ Jig.CollectorPipe = function() {
     }
 }
 
-Jig.filterToPipe = function(filter, solutions) {
-    return {
-        put: function(arg) {
-            return filter.applyTo(arg, solutions);
-        }
-    }
-}
-
 Jig.compose = function(up, down) {
     return {
-        applyTo: function(arg, solutions) {
-            var p = Jig.filterToPipe(down, solutions);
-            return up.applyTo(arg, p);
+        id: "c(" + up.id + ", " + down.id + ")",
+        apply: function(solutions) {
+            return up.apply(down.apply(solutions));
         }
     }
 }
@@ -236,15 +290,14 @@ Jig.Generator = function(filter) {
         },
 
         triples: function(subject, predicate, object, context) {
-            var c = store.getTriples(subject, predicate, object, context);
-            return extend(new Jig.CursorFilter(c));
+            return extend(new Jig.TriplesFilter(subject, predicate, object, context));
         },
 
         ////////////////////////////////
 
         count: function() {
             var c = new Jig.CountPipe();
-            filter.applyTo(null, c);
+            filter.apply(c).put(null);
             return c.getCount();
         },
 
@@ -252,19 +305,23 @@ Jig.Generator = function(filter) {
             var c = new Jig.CountPipe();
             var s = new Jig.SumPipe();
             var p = new TeePipe(c, s);
-            filter.applyTo(null, p);
+            filter.apply(p).put(null);
             return s.getSum() / c.getCount();
         },
 
         out: function() {
             var p = new Jig.CollectorPipe();
-            filter.applyTo(null, p);
+            filter.apply(p).put(null);
             return p.getArray();
+        },
+
+        path: function() {
+            return filter.id;
         },
 
         sum: function() {
             var c = new Jig.SumPipe();
-            filter.applyTo(null, c);
+            filter.apply(c).put(null);
             return c.getSum();
         },
 
@@ -274,16 +331,8 @@ Jig.Generator = function(filter) {
 
         print: function() {
             var p = new Jig.PrintPipe();
-            filter.applyTo(null, p);
+            filter.apply(p).put(null);
             return s;
-        }
-    }
-}
-
-Jig.TrivialFilter = function() {
-    return {
-        applyTo: function(arg, solutions) {
-            return solutions.put(arg);
         }
     }
 }

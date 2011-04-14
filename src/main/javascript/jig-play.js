@@ -23,6 +23,7 @@ g.triples(r, null, null, null).tail().distinct().inEdges().limit(10).out();
 
 
 
+g.triples(r, null, null, null).limit(10).tail().distinct().outEdges(null).path();
 
 
 g.triples(r, null, null, null).limit(10).tail().outEdges(null).out();
@@ -32,3 +33,10 @@ g.triples(r, null, null, null).limit(10).tail().outEdges(null).out();
 
 g.triples(r, null, null, null).limit(10).tail().distinct().out();
 g.triples(r, null, null, null).limit(10).tail().distinct().outEdges(null).out();
+
+
+
+g.single(r).outEdges(null).out();
+g.triples(r, null, null, null).out();
+store.getTriples(r, null, null, null);
+
