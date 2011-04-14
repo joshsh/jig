@@ -99,13 +99,13 @@ Jig.TriplesFilter = function(subject, predicate, object, context) {
     }
 }
 
-Jig.OutEdgesFilter = function() {
+Jig.OutEdgesFilter = function(predicate) {
     return {
         id: "outEdges",
         apply: function(solutions) {
             return {
                 put: function(arg) {
-                    var c = store.getTriples(arg, null, null, null);
+                    var c = store.getTriples(arg, predicate, null, null);
                     return pushCursor(c, solutions);
                 }
             }
@@ -113,13 +113,13 @@ Jig.OutEdgesFilter = function() {
     }
 }
 
-Jig.InEdgesFilter = function() {
+Jig.InEdgesFilter = function(predicate) {
     return {
         id: "inEdges",
         apply: function(solutions) {
             return {
                 put: function(arg) {
-                    var c = store.getTriples(null, null, arg, null);
+                    var c = store.getTriples(null, predicate, arg, null);
                     return pushCursor(c, solutions);
                 }
             }
@@ -277,12 +277,12 @@ Jig.Generator = function(filter) {
             return extend(new Jig.LimitFilter(l));
         },
 
-        inEdges: function() {
-            return extend(new Jig.InEdgesFilter());
+        inE: function(predicate) {
+            return extend(new Jig.InEdgesFilter(predicate));
         },
 
-        outEdges: function(label) {
-            return extend(new Jig.OutEdgesFilter());
+        outE: function(predicate) {
+            return extend(new Jig.OutEdgesFilter(predicate));
         },
 
         tail: function() {
@@ -309,7 +309,7 @@ Jig.Generator = function(filter) {
             return s.getSum() / c.getCount();
         },
 
-        out: function() {
+        eval: function() {
             var p = new Jig.CollectorPipe();
             filter.apply(p).put(null);
             return p.getArray();
