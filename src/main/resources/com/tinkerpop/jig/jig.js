@@ -1,5 +1,7 @@
 var Jig = {};
 
+/* helper functions ***********************************************************/
+
 function pushCursor(cursor, solutions) {
     var t = cursor.next();
     while (null != t) {
@@ -20,7 +22,16 @@ Jig.toNumber = function(r) {
     return 0;
 }
 
-/******************************************************************************/
+Jig.compose = function(up, down) {
+    return {
+        id: "c(" + up.id + ", " + down.id + ")",
+        apply: function(solutions) {
+            return up.apply(down.apply(solutions));
+        }
+    }
+}
+
+/* filters ********************************************************************/
 
 Jig.LimitFilter = function(limit) {
     return {
@@ -187,18 +198,7 @@ Jig.TeeFilter = function(filter1, filter2) {
     }
 }
 
-/******************************************************************************/
-
-Jig.PrintPipe = function() {
-    var count = 0;
-    return {
-        put: function(arg) {
-            count++;
-            s += "  [" + count + "]  " + arg + "\n";
-            return true;
-        }
-    }
-}
+/* pipes **********************************************************************/
 
 Jig.CountPipe = function() {
     var count = 0;
@@ -252,15 +252,7 @@ Jig.CollectorPipe = function() {
     }
 }
 
-Jig.compose = function(up, down) {
-    return {
-        id: "c(" + up.id + ", " + down.id + ")",
-        apply: function(solutions) {
-            return up.apply(down.apply(solutions));
-        }
-    }
-}
-
+/* generator ******************************************************************/
 
 /* Note: for "class" inheritance is limited by the subset of JavaScript which is
    supported by the JavaScript-to-Common-Lisp compiler.  This apparently does
@@ -355,16 +347,6 @@ Jig.Generator = function(filter) {
             var c = new Jig.SumPipe();
             filter.apply(c).put(null);
             return c.getSum();
-        },
-
-        getFilter: function() {
-            return filter;
-        },
-
-        print: function() {
-            var p = new Jig.PrintPipe();
-            filter.apply(p).put(null);
-            return s;
         }
     }
 }

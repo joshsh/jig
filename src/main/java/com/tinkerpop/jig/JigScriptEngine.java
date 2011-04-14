@@ -60,12 +60,43 @@ public class JigScriptEngine implements ScriptEngine {
     @Override
     public Object eval(final String script) throws ScriptException {
         try {
-            return issueRequest(script);
+            return issueRequest(transformScript(script));
         } catch (IOException e) {
             throw new ScriptException(e);
         } catch (JSONException e) {
             throw new ScriptException(e);
         }
+    }
+
+    private String transformScript(final String script) {
+        String[] steps = new String[]{
+                "bothE",
+                "count",
+                "distinct",
+                "e",
+                "ends",
+                "eval",
+                "head",
+                "inE",
+                "label",
+                "limit",
+                "mean",
+                "outE",
+                "path",
+                "sum",
+                "tail",
+                "triples",
+                "v"};
+
+        // Emulate method metaprogramming
+        String r = script.trim();
+        for (String step : steps) {
+            r = r.replaceAll("[.]" + step + "[.]", "." + step + "().");
+            r = r.replaceAll("[.]" + step + "$", "." + step + "()");
+            r = r.replaceAll("[.]" + step + "\\s*;", "." + step + "();");
+        }
+
+        return r;
     }
 
     @Override

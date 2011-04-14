@@ -10,7 +10,7 @@ type = Part.resource(rdf + "type");
 
 r = Part.resource("http://www4.wiwiss.fu-berlin.de/dailymed/resource/drugs/2908");
 
-g.v(r).outE(type).head().eval();
+g.v(r).outE(type).head.eval
 
 
 
@@ -19,11 +19,12 @@ g.v(r).outE(type).head().eval();
 g.triples(r).limit(10).head().eval();
 
 
+g.triples(r, null, null, null).limit(10).tail().distinct().outE.eval();
 
 
 
 
-g.triples(r, null, null, null).limit(10).tail().distinct().outE(null).eval();
+g.triples(r, null, null, null).limit(10).tail().distinct().outE().eval();
 g.triples(r, null, null, null).limit(10).tail().distinct().inE().eval();
 
 g.triples(r, null, null, null).tail().distinct().outE(null).limit(10).eval();
