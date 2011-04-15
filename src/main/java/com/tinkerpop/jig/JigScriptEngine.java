@@ -23,6 +23,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * User: josh
@@ -71,29 +74,46 @@ public class JigScriptEngine implements ScriptEngine {
     private String transformScript(final String script) {
         String[] steps = new String[]{
                 "bothE",
-                "count",
                 "distinct",
                 "e",
                 "ends",
-                "eval",
                 "head",
                 "inE",
                 "label",
                 "limit",
-                "mean",
                 "outE",
-                "path",
-                "sum",
                 "tail",
                 "triples",
                 "v"};
+        String[] methods = new String[]{
+                "count",
+                "eval",
+                "mean",
+                "path",
+                "sum",
+        };
+        Collection<String> keywords = new LinkedList<String>();
+        keywords.addAll(Arrays.asList(steps));
+        keywords.addAll(Arrays.asList(methods));
 
-        // Emulate method metaprogramming
+        // Emulate method metaprogramming at a syntactic level (since the JavaScript-to-Lisp compiler doesn't support it)
         String r = script.trim();
         for (String step : steps) {
-            r = r.replaceAll("[.]" + step + "[.]", "." + step + "().");
-            r = r.replaceAll("[.]" + step + "$", "." + step + "()");
-            r = r.replaceAll("[.]" + step + "\\s*;", "." + step + "();");
+            if (r.endsWith("." + step)) {
+                r = r + ".eval";
+                break;
+            } else if (r.endsWith(")")) {
+                int i = r.lastIndexOf("(");
+                if (r.substring(0, i).endsWith(step)) {
+                    r = r + ".eval";
+                    break;
+                }
+            }
+        }
+        for (String k : keywords) {
+            r = r.replaceAll("[.]" + k + "[.]", "." + k + "().");
+            r = r.replaceAll("[.]" + k + "$", "." + k + "()");
+            r = r.replaceAll("[.]" + k + "\\s*;", "." + k + "();");
         }
 
         return r;

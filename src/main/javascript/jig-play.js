@@ -8,12 +8,14 @@ name = Part.resource(dailymed + "name"); \
 type = Part.resource(rdf + "type"); \
                                     \
 r = Part.resource("http://www4.wiwiss.fu-berlin.de/dailymed/resource/drugs/2908");
+i = Part.resource("http://www4.wiwiss.fu-berlin.de/dailymed/resource/ingredient/Irbesartan");
 
 g.v(r).outE(type).head.eval
 
 
 
 t = new Generator(store);
+t.breadthFirstPath(r, i);
 
 
 
