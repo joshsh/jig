@@ -67,12 +67,13 @@ public class JigConsole {
         if (previous.length() > 0) {
             if (cont) {
                 if (s.length() > 0) {
-                    previous += "\n";
+                    previous += "\n" + s;
                 }
                 return true;
             } else {
+                s = previous + s;
                 previous = "";
-                return executeScript(previous + s);
+                return executeScript(s);
             }
         } else {
             if (cont) {
