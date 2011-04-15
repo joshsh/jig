@@ -33,6 +33,27 @@ import java.util.LinkedList;
  * Time: 7:02 PM
  */
 public class JigScriptEngine implements ScriptEngine {
+    private static final String[] steps = new String[]{
+            "bothE",
+            "distinct",
+            "e",
+            "ends",
+            "head",
+            "inE",
+            "label",
+            "limit",
+            "outE",
+            "tail",
+            "triples",
+            "v"};
+    private static final String[] methods = new String[]{
+            "count",
+            "eval",
+            "mean",
+            "path",
+            "sum",
+    };
+
     private final String endpoint;
     private final String userName;
     private final String password;
@@ -72,109 +93,132 @@ public class JigScriptEngine implements ScriptEngine {
     }
 
     private String transformScript(final String script) {
-        String[] steps = new String[]{
-                "bothE",
-                "distinct",
-                "e",
-                "ends",
-                "head",
-                "inE",
-                "label",
-                "limit",
-                "outE",
-                "tail",
-                "triples",
-                "v"};
-        String[] methods = new String[]{
-                "count",
-                "eval",
-                "mean",
-                "path",
-                "sum",
-        };
         Collection<String> keywords = new LinkedList<String>();
         keywords.addAll(Arrays.asList(steps));
         keywords.addAll(Arrays.asList(methods));
 
         // Emulate method metaprogramming at a syntactic level (since the JavaScript-to-Lisp compiler doesn't support it)
         String r = script.trim();
-        for (String step : steps) {
-            if (r.endsWith("." + step)) {
-                r = r + ".eval";
-                break;
-            } else if (r.endsWith(")")) {
-                int i = r.lastIndexOf("(");
-                if (r.substring(0, i).endsWith(step)) {
-                    r = r + ".eval";
-                    break;
-                }
-            }
+        while (r.endsWith(";")) {
+            r = r.substring(0, r.length() - 1).trim();
         }
         for (String k : keywords) {
             r = r.replaceAll("[.]" + k + "[.]", "." + k + "().");
+            r = r.replaceAll("[.]" + k + "\\[", "." + k + "()[");
             r = r.replaceAll("[.]" + k + "$", "." + k + "()");
-            r = r.replaceAll("[.]" + k + "\\s*;", "." + k + "();");
+            //r = r.replaceAll("[.]" + k + "\\s*;", "." + k + "();");
+        }
+        r = cleanParens(r);
+        r = cleanBrackets(r);
+        for (String step : steps) {
+            if (r.endsWith("." + step)) {
+                r = r + ".eval()";
+                break;
+            }
+        }
+
+        //System.out.println("[ r = " + r + "]");
+        return r;
+    }
+
+    private String cleanParens(final String r) {
+        if (r.endsWith(")")) {
+            int i = r.lastIndexOf("(");
+            String s = r.substring(0, i);
+            for (String step : steps) {
+                if (s.endsWith("." + step)) {
+                    return r + ".eval()";
+                }
+            }
         }
 
         return r;
     }
 
+    private String cleanBrackets(final String r) {
+        if (r.endsWith("]")) {
+            int i = r.lastIndexOf("[");
+            return cleanParens(r.substring(0, i)) + r.substring(i);
+        } else {
+            return r;
+        }
+    }
+
     @Override
-    public Object eval(final Reader reader) throws ScriptException {
+    public Object eval
+            (
+                    final Reader reader) throws ScriptException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public Object eval(final String script,
-                       final Bindings bindings) throws ScriptException {
+    public Object eval
+            (
+                    final String script,
+                    final Bindings bindings) throws ScriptException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public Object eval(final Reader reader,
-                       final Bindings bindings) throws ScriptException {
+    public Object eval
+            (
+                    final Reader reader,
+                    final Bindings bindings) throws ScriptException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void put(final String key,
+    public void put
+            (
+                    final String key,
                     final Object value) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public Object get(final String key) {
+    public Object get
+            (
+                    final String key) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public Bindings getBindings(final int scope) {
+    public Bindings getBindings
+            (
+                    final int scope) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void setBindings(final Bindings bindings,
-                            final int i) {
+    public void setBindings
+            (
+                    final Bindings bindings,
+                    final int i) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public Bindings createBindings() {
+    public Bindings createBindings
+            () {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public ScriptContext getContext() {
+    public ScriptContext getContext
+            () {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void setContext(final ScriptContext context) {
+    public void setContext
+            (
+                    final ScriptContext context) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public ScriptEngineFactory getFactory() {
+    public ScriptEngineFactory getFactory
+            () {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

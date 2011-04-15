@@ -7,9 +7,13 @@ import org.json.JSONException;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An interactive command-line interface for <code>JigScriptEngine</code>.
@@ -17,6 +21,16 @@ import java.io.OutputStreamWriter;
 public class JigConsole {
     private final ScriptEngine scriptEngine;
     private final ConsoleReader reader;
+    private static final Map<String, String> prefixForNamespace;
+
+    static {
+        prefixForNamespace = new HashMap<String, String>();
+        try {
+            addCommonNamespaces();
+        } catch (IOException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     private String previous = "";
     private int lineNumber = 0;
@@ -25,6 +39,7 @@ public class JigConsole {
                       final ScriptEngine scriptEngine) throws IOException {
         this.scriptEngine = scriptEngine;
         reader = new ConsoleReader(in, new OutputStreamWriter(System.out));
+
 
         reader.addCompletor(new SimpleCompletor(new String[]{
                 "Jig",
@@ -100,11 +115,89 @@ public class JigConsole {
     private void showResult(final Object result) throws JSONException {
         if (result instanceof JSONArray) {
             JSONArray a = (JSONArray) result;
+            // Note: 0-indexed (so as to align result indexes with JavaScript array indexes)
             for (int i = 0; i < a.length(); i++) {
-                System.out.println("  [" + (i + 1) + "]  " + a.get(i));
+                System.out.println("  [" + i + "]  "
+                        + a.get(i));
+                //    + prettifyResult(a.get(i).toString()));
             }
         } else {
-            System.out.println("  [1]  " + result);
+            System.out.println("  [0]  " + result);
+        }
+    }
+
+    static final String test = "  [0]  [\"<http://data.linkedct.org/resource/intervention/41635>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01029>\"]\n";// +
+
+    /*   "  [1]  [\"<http://data.linkedct.org/resource/intervention/41600>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01234>\"]\n" +
+    "  [2]  [\"<http://data.linkedct.org/resource/intervention/41582>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01229>\"]\n" +
+    "  [3]  [\"<http://data.linkedct.org/resource/intervention/41553>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01202>\"]\n" +
+    "  [4]  [\"<http://data.linkedct.org/resource/intervention/41551>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01202>\"]\n" +
+    "  [5]  [\"<http://data.linkedct.org/resource/intervention/41550>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01202>\"]\n" +
+    "  [6]  [\"<http://data.linkedct.org/resource/intervention/41528>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01229>\"]\n" +
+    "  [7]  [\"<http://data.linkedct.org/resource/intervention/41526>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00959>\"]\n" +
+    "  [8]  [\"<http://data.linkedct.org/resource/intervention/41518>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00958>\"]\n" +
+    "  [9]  [\"<http://data.linkedct.org/resource/intervention/41501>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00959>\"]";
+    */
+    private static String prettifyResult(final String before) {
+        StringBuilder sb = new StringBuilder();
+        int i = 0, j;
+        while (true) {
+            j = before.indexOf("\"<", i);
+            //System.out.println("j = " + j + " (i=" + i + ")");
+            if (j < 0) {
+                sb.append(before.substring(i));
+                return sb.toString();
+            } else {
+                int k = before.indexOf(">\"", j);
+                //System.out.println("  k = " + k);
+                String uri = before.substring(j + 2, k);
+                //System.out.println("  uri = " + uri);
+                boolean found = false;
+                for (String ns : prefixForNamespace.keySet()) {
+                    if (uri.startsWith(ns)) {
+                        //System.out.println("  (i, j) = " + "(" + i + ", " + j + ")");
+                        sb.append(before.substring(i, j));
+                        sb.append(prefixForNamespace.get(ns));
+                        sb.append(":");
+                        sb.append(uri.substring(ns.length()));
+                        //System.out.println("sb: " + sb.toString());
+                        i = k + 2;
+                        if (i >= before.length()) {
+                            return sb.toString();
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    sb.append(before.substring(i, k));
+                    i = k;
+                }
+            }
+        }
+    }
+
+    public static void main(final String[] args) throws Exception {
+        System.out.println(prettifyResult(test));
+    }
+
+    private static void addCommonNamespaces() throws IOException {
+        InputStream is = Jig.class.getResourceAsStream("common-namespaces.txt");
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            String l;
+            while ((l = br.readLine()) != null) {
+                l = l.trim();
+                if (0 < l.length() && !l.startsWith("#")) {
+                    int i = l.indexOf("\t");
+                    String prefix = l.substring(0, i);
+                    String uri = l.substring(i + 1);
+
+                    prefixForNamespace.put(uri, prefix);
+                }
+            }
+        } finally {
+            is.close();
         }
     }
 }

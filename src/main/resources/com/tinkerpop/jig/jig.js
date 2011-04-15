@@ -347,10 +347,30 @@ Jig.Generator = function(filter) {
             var c = new Jig.SumPipe();
             filter.apply(c).put(null);
             return c.getSum();
+        },
+
+        ////////////////////////////////
+
+        _getFilter: function() {
+            return filter;
         }
     }
 }
 
+/* ... ******************************************************************/
+
 Jig.Graph = function() {
     return new Jig.Generator(new Jig.TrivialFilter());
+}
+
+function neighbors(r) {
+    var p = new Jig.CollectorPipe();
+    var d = new Jig.DistinctFilter().apply(p);
+
+    new Jig.Graph().triples(r, null, null, null).head()._getFilter().apply(d).put(null);
+    new Jig.Graph().triples(null, null, r, null).tail()._getFilter().apply(d).put(null);
+//    new Jig.TriplesFilter(r, null, null, null).apply(d).put(null);
+//    new Jig.TriplesFilter(null, null, r, null).apply(d).put(null);
+
+    return p.getArray();
 }
