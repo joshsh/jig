@@ -35,6 +35,7 @@ import java.util.LinkedList;
 public class JigScriptEngine implements ScriptEngine {
     private static final String[] steps = new String[]{
             "bothE",
+            "common",
             "distinct",
             "e",
             "ends",
@@ -42,11 +43,13 @@ public class JigScriptEngine implements ScriptEngine {
             "inE",
             "label",
             "limit",
+            "nearby",
             "outE",
             "tail",
             "triples",
             "v"};
     private static final String[] methods = new String[]{
+            "aggr",
             "count",
             "eval",
             "mean",

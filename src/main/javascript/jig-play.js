@@ -45,9 +45,15 @@ t.breadthFirstPaths(gene1, target1, 2)
 
 
 
+Jig.undirectedUnlabeledGenerator.neighbors(d[0], 1)
 
 
-t = new Generator(store, neighbors);
+function intersect(v1, v2) {
+
+}
+
+
+t = new Generator(store, neighborNew);
 t.neighbors(r, 2);
 t.breadthFirstPath(drug1, drug2, 2);
 t.breadthFirstPaths(drug1, drug2, 2);
