@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,10 +104,15 @@ public class JigConsole {
     }
 
     private boolean executeScript(final String script) throws ScriptException, JSONException {
+        //long before = new Date().getTime();
+
         System.out.println("");
         Object result = scriptEngine.eval(script.trim());
         showResult(result);
         System.out.println("");
+
+        //long after = new Date().getTime();
+        //System.out.println("[script took " + (after - before) + "ms]");
 
         // TODO: provide a "quit" command
         return true;

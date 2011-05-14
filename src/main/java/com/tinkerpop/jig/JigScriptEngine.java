@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 
 /**
@@ -237,7 +238,10 @@ public class JigScriptEngine implements ScriptEngine {
         String auth = new String(Base64.encodeBase64((userName + ":" + password).getBytes()));
         request.setHeader("Authorization", "Basic " + auth);
 
+        //long before = new Date().getTime();
         HttpResponse response = client.execute(request);
+        long after = new Date().getTime();
+        //System.out.println("[request took " + (after - before) + "ms]");
         int responseCode = response.getStatusLine().getStatusCode();
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
