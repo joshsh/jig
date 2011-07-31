@@ -5,9 +5,7 @@ import javax.script.ScriptEngineFactory;
 import java.util.List;
 
 /**
- * User: josh
- * Date: 4/11/11
- * Time: 7:04 PM
+ * @author Joshua Shinavier (http://fortytwo.net)
  */
 public class JigScriptEngineFactory implements ScriptEngineFactory {
     @Override
