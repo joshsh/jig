@@ -12,12 +12,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * An interactive command-line interface for <code>JigScriptEngine</code>.
+ *
+ * @author Joshua Shinavier (http://fortytwo.net)
  */
 public class JigConsole {
     private final ScriptEngine scriptEngine;

@@ -29,9 +29,7 @@ import java.util.Date;
 import java.util.LinkedList;
 
 /**
- * User: josh
- * Date: 4/11/11
- * Time: 7:02 PM
+ * @author Joshua Shinavier (http://fortytwo.net)
  */
 public class JigScriptEngine implements ScriptEngine {
     private static final String[] steps = new String[]{

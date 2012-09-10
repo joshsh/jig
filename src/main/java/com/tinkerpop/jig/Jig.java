@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * User: josh
- * Date: 4/11/11
- * Time: 7:12 PM
+ * @author Joshua Shinavier (http://fortytwo.net)
  */
 public class Jig {
     private static final String
