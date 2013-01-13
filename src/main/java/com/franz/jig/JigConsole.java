@@ -1,6 +1,5 @@
 package com.franz.jig;
 
-import com.franz.jig.Jig;
 import jline.ConsoleReader;
 import jline.SimpleCompletor;
 import org.json.JSONArray;
@@ -12,7 +11,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,12 +23,14 @@ import java.util.Map;
  * @author Joshua Shinavier (http://fortytwo.net)
  */
 public class JigConsole {
+    private static final Map<String, String> PREFIX_FOR_NAMESPACE;
+
     private final ScriptEngine scriptEngine;
     private final ConsoleReader reader;
-    private static final Map<String, String> prefixForNamespace;
+    private final PrintStream ps;
 
     static {
-        prefixForNamespace = new HashMap<String, String>();
+        PREFIX_FOR_NAMESPACE = new HashMap<String, String>();
         try {
             addCommonNamespaces();
         } catch (IOException e) {
@@ -38,11 +41,12 @@ public class JigConsole {
     private String previous = "";
     private int lineNumber = 0;
 
-    public JigConsole(final InputStream in,
-                      final ScriptEngine scriptEngine) throws IOException {
+    public JigConsole(final ScriptEngine scriptEngine,
+                      final InputStream in,
+                      final OutputStream out) throws IOException {
         this.scriptEngine = scriptEngine;
-        reader = new ConsoleReader(in, new OutputStreamWriter(System.out));
-
+        this.ps = new PrintStream(out);
+        reader = new ConsoleReader(in, new OutputStreamWriter(out));
 
         reader.addCompletor(new SimpleCompletor(new String[]{
                 "Jig",
@@ -64,17 +68,18 @@ public class JigConsole {
         }
     }
 
-    private boolean readLine() throws ScriptException, IOException, JSONException {
+    public boolean readLine() throws ScriptException, IOException, JSONException {
         ++lineNumber;
 
         String prefix = "jig)  ";
 //        String prefix = "" + lineNumber + ")  ";
         String line = reader.readLine(prefix);
 
-        return null != line && tryLine(line);
+        return null != line && parseLine(line, true);
     }
 
-    private boolean tryLine(final String line) throws ScriptException, JSONException {
+    public boolean parseLine(final String line,
+                             final boolean padOutput) throws ScriptException, JSONException {
         String s = line.trim();
 
         boolean cont = s.endsWith("\\");
@@ -91,7 +96,7 @@ public class JigConsole {
             } else {
                 s = previous + s;
                 previous = "";
-                return executeScript(s);
+                return executeScript(s, padOutput);
             }
         } else {
             if (cont) {
@@ -100,18 +105,23 @@ public class JigConsole {
                 }
                 return true;
             } else {
-                return s.length() == 0 || executeScript(s);
+                return s.length() == 0 || executeScript(s, padOutput);
             }
         }
     }
 
-    private boolean executeScript(final String script) throws ScriptException, JSONException {
+    private boolean executeScript(final String script,
+                                  final boolean padOutput) throws ScriptException, JSONException {
         //long before = new Date().getTime();
 
-        System.out.println("");
+        if (padOutput) {
+            ps.println("");
+        }
         Object result = scriptEngine.eval(script.trim());
         showResult(result);
-        System.out.println("");
+        if (padOutput) {
+            ps.println("");
+        }
 
         //long after = new Date().getTime();
         //System.out.println("[script took " + (after - before) + "ms]");
@@ -125,12 +135,12 @@ public class JigConsole {
             JSONArray a = (JSONArray) result;
             // Note: 0-indexed (so as to align result indexes with JavaScript array indexes)
             for (int i = 0; i < a.length(); i++) {
-                System.out.println("  [" + i + "]  "
+                ps.println("  [" + i + "]  "
                         + a.get(i));
                 //    + prettifyResult(a.get(i).toString()));
             }
         } else {
-            System.out.println("  [0]  " + result);
+            ps.println("  [0]  " + result);
         }
     }
 
@@ -161,11 +171,11 @@ public class JigConsole {
                 String uri = before.substring(j + 2, k);
                 //System.out.println("  uri = " + uri);
                 boolean found = false;
-                for (String ns : prefixForNamespace.keySet()) {
+                for (String ns : PREFIX_FOR_NAMESPACE.keySet()) {
                     if (uri.startsWith(ns)) {
                         //System.out.println("  (i, j) = " + "(" + i + ", " + j + ")");
                         sb.append(before.substring(i, j));
-                        sb.append(prefixForNamespace.get(ns));
+                        sb.append(PREFIX_FOR_NAMESPACE.get(ns));
                         sb.append(":");
                         sb.append(uri.substring(ns.length()));
                         //System.out.println("sb: " + sb.toString());
@@ -201,7 +211,7 @@ public class JigConsole {
                     String prefix = l.substring(0, i);
                     String uri = l.substring(i + 1);
 
-                    prefixForNamespace.put(uri, prefix);
+                    PREFIX_FOR_NAMESPACE.put(uri, prefix);
                 }
             }
         } finally {

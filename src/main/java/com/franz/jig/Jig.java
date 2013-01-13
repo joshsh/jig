@@ -3,6 +3,7 @@ package com.franz.jig;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
 /**
@@ -14,27 +15,12 @@ public class Jig {
             USERNAME = "com.franz.jig.allegro.username",
             PASSWORD = "com.franz.jig.allegro.password";
 
-    public static void main(final String[] args) {
-        try {
-            if (1 != args.length) {
-                printUsage();
-                System.exit(1);
-            }
-            String file = args[0];
-            run(file);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            System.exit(1);
-        }
-    }
+    // Note: this property is used outside of Jig (e.g. in the experimental Jig Console) to refer to its current version
+    public static final String VERSION = "1.0-SNAPSHOT";
 
-    private static void printUsage() {
-        System.out.println("Usage:  jig [configuration file]");
-        System.out.println("For more information, please see:\n"
-                + "  <URL:https://github.com/joshsh/jig>.");
-    }
-
-    private static void run(final String propsFile) throws Exception {
+    public static JigConsole loadConsole(final String propsFile,
+                                         final InputStream in,
+                                         final OutputStream out) throws Exception {
         File f = new File(propsFile);
         Properties config = new Properties();
         InputStream is = new FileInputStream(f);
@@ -51,7 +37,27 @@ public class Jig {
         JigScriptEngine e = new JigScriptEngine(endpoint, userName, password);
         e.initialize();
 
-        JigConsole c = new JigConsole(System.in, e);
-        c.run();
+        return new JigConsole(e, in, out);
+    }
+
+    private static void printUsage() {
+        System.out.println("Usage:  jig [configuration file]");
+        System.out.println("For more information, please see:\n"
+                + "  <URL:https://github.com/joshsh/jig>.");
+    }
+
+    public static void main(final String[] args) {
+        try {
+            if (1 != args.length) {
+                printUsage();
+                System.exit(1);
+            }
+            String file = args[0];
+            JigConsole c = loadConsole(file, System.in, System.out);
+            c.run();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
     }
 }
