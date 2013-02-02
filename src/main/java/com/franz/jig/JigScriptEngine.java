@@ -1,6 +1,5 @@
 package com.franz.jig;
 
-import com.franz.jig.Jig;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -72,19 +71,18 @@ public class JigScriptEngine implements ScriptEngine {
         client = createHttpClient();
     }
 
-    @Override
     public Object eval(final String script,
                        final ScriptContext context) throws ScriptException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        // TODO
+        return null;
     }
 
-    @Override
     public Object eval(final Reader reader,
                        final ScriptContext context) throws ScriptException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        // TODO
+        return null;
     }
 
-    @Override
     public Object eval(final String script) throws ScriptException {
         try {
             return issueRequest(transformScript(script));
@@ -147,82 +145,59 @@ public class JigScriptEngine implements ScriptEngine {
         }
     }
 
-    @Override
-    public Object eval
-            (
-                    final Reader reader) throws ScriptException {
+    public Object eval(final Reader reader) throws ScriptException {
+        // TODO
+        return null;
+    }
+
+    public Object eval(final String script,
+                       final Bindings bindings) throws ScriptException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
-    public Object eval
-            (
-                    final String script,
-                    final Bindings bindings) throws ScriptException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Object eval(final Reader reader,
+                       final Bindings bindings) throws ScriptException {
+        // TODO
+        return null;
     }
 
-    @Override
-    public Object eval
-            (
-                    final Reader reader,
-                    final Bindings bindings) throws ScriptException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void put
-            (
-                    final String key,
+    public void put(final String key,
                     final Object value) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // TODO
     }
 
-    @Override
-    public Object get
-            (
-                    final String key) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Object get(final String key) {
+        // TODO
+        return null;
     }
 
-    @Override
-    public Bindings getBindings
-            (
-                    final int scope) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Bindings getBindings(final int scope) {
+        // TODO
+        return null;
     }
 
-    @Override
-    public void setBindings
-            (
-                    final Bindings bindings,
-                    final int i) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void setBindings(final Bindings bindings,
+                            final int i) {
+        // TODO
     }
 
-    @Override
-    public Bindings createBindings
-            () {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Bindings createBindings() {
+        // TODO
+        return null;
     }
 
-    @Override
-    public ScriptContext getContext
-            () {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public ScriptContext getContext() {
+        // TODO
+        return null;
     }
 
-    @Override
-    public void setContext
-            (
-                    final ScriptContext context) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void setContext(final ScriptContext context) {
+        // TODO
     }
 
-    @Override
-    public ScriptEngineFactory getFactory
-            () {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public ScriptEngineFactory getFactory() {
+        // TODO
+        return null;
     }
 
     private static HttpClient createHttpClient() {
