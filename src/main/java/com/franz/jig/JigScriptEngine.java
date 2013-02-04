@@ -56,6 +56,14 @@ public class JigScriptEngine implements ScriptEngine {
             "sum",
     };
 
+    private static final Collection<String> keywords;
+
+    static {
+        keywords = new LinkedList<String>();
+        keywords.addAll(Arrays.asList(steps));
+        keywords.addAll(Arrays.asList(methods));
+    }
+
     private final String endpoint;
     private final String userName;
     private final String password;
@@ -94,10 +102,6 @@ public class JigScriptEngine implements ScriptEngine {
     }
 
     private String transformScript(final String script) {
-        Collection<String> keywords = new LinkedList<String>();
-        keywords.addAll(Arrays.asList(steps));
-        keywords.addAll(Arrays.asList(methods));
-
         // Emulate method metaprogramming at a syntactic level (since the JavaScript-to-Lisp compiler doesn't support it)
         String r = script.trim();
         while (r.endsWith(";")) {
@@ -122,6 +126,9 @@ public class JigScriptEngine implements ScriptEngine {
         return r;
     }
 
+    // appends an ".eval()" for raw steps
+    // e.g. "foo.head()" becomes "foo.head().eval()"
+    // note: this is an expensive operation
     private String cleanParens(final String r) {
         if (r.endsWith(")")) {
             int i = r.lastIndexOf("(");
