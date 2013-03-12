@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.franz.jig</groupId>
     <artifactId>jig</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
     <name>Jig: JavaScript interface for graph traversal</name>
     <description>Jig is a JavaScript-based language for fast traversal of property graphs</description>
