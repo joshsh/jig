@@ -3,7 +3,7 @@ Jig (JavaScript-based interface for graph traversal) is a graph-based programmin
 All Jig expressions are valid JavaScript, but behind the scenes, they are compiled to [Allegro Common Lisp](http://www.franz.com/products/allegrocl/), which as executes efficiently as possible in the AllegroGraph server environment.  In this way, you can easily explore a graph or incrementally build up simple programs at the [REPL](http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop), but you also have the power of the Lisp compiler if you need it for more complex and computationally intensive tasks.
 
 Syntax reference:
-* [[Jig steps]]
+* [Jig steps](https://github.com/joshsh/jig/wiki/Jig-steps)
 
 Here is an example of a Jig program:
 
