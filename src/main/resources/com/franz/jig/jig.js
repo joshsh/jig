@@ -126,6 +126,95 @@ Jig.undirectedUnlabeledGenerator = new Generator(store, neighbors);
 
 /* filters ********************************************************************/
 
+Jig.CommonFilter = function(v1, v2, depth) {
+    if (null == depth) {
+        depth = 2;
+    }
+    return {
+        id: "common",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var a = Jig.undirectedUnlabeledGenerator.breadthFirstPaths(v1, v2, depth);
+                    for (var i = 0; i < a.length; i++) {
+                        var p = a[i];
+                        var r = new Array();
+                        for (var j = 0; j < p.length - 2; j++) {
+                            r[j] = p[j + 1];
+                        }
+                        if (!solutions.put(r)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+        }
+    }
+}
+
+Jig.DistinctFilter = function() {
+    return {
+        id: "distinct",
+        apply: function(solutions) {
+            var set = {};
+            return {
+                put: function(arg) {
+                    if (set[arg]) {
+                        return true;
+                    } else {
+                        set[arg] = true;
+                        return solutions.put(arg);
+                    }
+                }
+            }
+        }
+    }
+}
+
+Jig.HeadFilter = function() {
+    return {
+        id: "head",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var s = arg.object;
+                    return solutions.put(s);
+                }
+            }
+        }
+    }
+}
+
+Jig.InEdgesFilter = function(predicate) {
+    return {
+        id: "inEdges",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var c = store.getTriples(null, predicate, arg, null);
+                    return pushCursor(c, solutions);
+                }
+            }
+        }
+    }
+}
+
+Jig.LabelFilter = function() {
+    return {
+        id: "label",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var s = arg.predicate;
+                    return solutions.put(s);
+                }
+            }
+        }
+    }
+}
+
 Jig.LimitFilter = function(limit) {
     return {
         id: "limit",
@@ -217,90 +306,6 @@ Jig.OptionFilter = function(other) {
     }
 }
 
-Jig.HeadFilter = function() {
-    return {
-        id: "head",
-        apply: function(solutions) {
-            return {
-                put: function(arg) {
-                    var s = arg.object;
-                    return solutions.put(s);
-                }
-            }
-        }
-    }
-}
-
-Jig.TailFilter = function() {
-    return {
-        id: "tail",
-        apply: function(solutions) {
-            return {
-                put: function(arg) {
-                    var s = arg.subject;
-                    return solutions.put(s);
-                }
-            }
-        }
-    }
-}
-
-Jig.LabelFilter = function() {
-    return {
-        id: "label",
-        apply: function(solutions) {
-            return {
-                put: function(arg) {
-                    var s = arg.predicate;
-                    return solutions.put(s);
-                }
-            }
-        }
-    }
-}
-
-Jig.TriplesFilter = function(subject, predicate, object, context) {
-    return {
-        id: "triples",
-        apply: function(solutions) {
-            return {
-                put: function(arg) {
-                    var c = store.getTriples(subject, predicate, object, context);
-                    return pushCursor(c, solutions);
-                }
-            }
-        }
-    }
-}
-
-Jig.CommonFilter = function(v1, v2, depth) {
-    if (null == depth) {
-        depth = 2;
-    }
-    return {
-        id: "common",
-        apply: function(solutions) {
-            return {
-                put: function(arg) {
-                    var a = Jig.undirectedUnlabeledGenerator.breadthFirstPaths(v1, v2, depth);
-                    for (var i = 0; i < a.length; i++) {
-                        var p = a[i];
-                        var r = new Array();
-                        for (var j = 0; j < p.length - 2; j++) {
-                            r[j] = p[j + 1];
-                        }
-                        if (!solutions.put(r)) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-            }
-        }
-    }
-}
-
 Jig.OutEdgesFilter = function(predicate) {
     return {
         id: "outEdges",
@@ -308,20 +313,6 @@ Jig.OutEdgesFilter = function(predicate) {
             return {
                 put: function(arg) {
                     var c = store.getTriples(arg, predicate, null, null);
-                    return pushCursor(c, solutions);
-                }
-            }
-        }
-    }
-}
-
-Jig.InEdgesFilter = function(predicate) {
-    return {
-        id: "inEdges",
-        apply: function(solutions) {
-            return {
-                put: function(arg) {
-                    var c = store.getTriples(null, predicate, arg, null);
                     return pushCursor(c, solutions);
                 }
             }
@@ -342,32 +333,14 @@ Jig.SingletonFilter = function(c) {
     }
 }
 
-Jig.DistinctFilter = function() {
+Jig.TailFilter = function() {
     return {
-        id: "distinct",
-        apply: function(solutions) {
-            var set = {};
-            return {
-                put: function(arg) {
-                    if (set[arg]) {
-                        return true;
-                    } else {
-                        set[arg] = true;
-                        return solutions.put(arg);
-                    }
-                }
-            }
-        }
-    }
-}
-
-Jig.TrivialFilter = function() {
-    return {
-        id: "trivial",
+        id: "tail",
         apply: function(solutions) {
             return {
                 put: function(arg) {
-                    return solutions.put(arg);
+                    var s = arg.subject;
+                    return solutions.put(s);
                 }
             }
         }
@@ -389,21 +362,35 @@ Jig.TeeFilter = function(filter1, filter2) {
     }
 }
 
-/* pipes **********************************************************************/
-
-Jig.CountPipe = function() {
-    var count = 0;
+Jig.TriplesFilter = function(subject, predicate, object, context) {
     return {
-        put: function(arg) {
-            count++;
-            return true;
-        },
-
-        getCount: function() {
-            return count;
+        id: "triples",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var c = store.getTriples(subject, predicate, object, context);
+                    return pushCursor(c, solutions);
+                }
+            }
         }
     }
 }
+
+Jig.TrivialFilter = function() {
+    return {
+        id: "trivial",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    return solutions.put(arg);
+                }
+            }
+        }
+    }
+}
+
+
+/* pipes **********************************************************************/
 
 Jig.AggregatePipe = function(min) {
     if (null == min) {
@@ -446,6 +433,37 @@ Jig.AggregatePipe = function(min) {
     }
 }
 
+Jig.CollectorPipe = function() {
+    var array = new Array();
+    var count = 0;
+
+    return {
+        put: function(arg) {
+            array[count] = arg;
+            count++;
+            return true;
+        },
+
+        getArray: function() {
+            return array;
+        }
+    }
+}
+
+Jig.CountPipe = function() {
+    var count = 0;
+    return {
+        put: function(arg) {
+            count++;
+            return true;
+        },
+
+        getCount: function() {
+            return count;
+        }
+    }
+}
+
 Jig.SumPipe = function() {
     var sum = 0;
     return {
@@ -468,22 +486,6 @@ Jig.TeePipe = function(pipe1, pip2) {
     }
 }
 
-Jig.CollectorPipe = function() {
-    var array = new Array();
-    var count = 0;
-
-    return {
-        put: function(arg) {
-            array[count] = arg;
-            count++;
-            return true;
-        },
-
-        getArray: function() {
-            return array;
-        }
-    }
-}
 
 /* generator ******************************************************************/
 
@@ -497,16 +499,34 @@ Jig.Generator = function(filter) {
     }
 
     return {
-        e: function(c) {
-            return extend(new Jig.SingletonFilter(c));
+        aggr: function(limit) {
+            var c = new Jig.AggregatePipe(limit);
+            filter.apply(c).put(null);
+            return c.getVector();
         },
 
-        v: function(c) {
-            return extend(new Jig.SingletonFilter(c));
+        bothE: function(predicate) {
+            return extend(new Jig.TeeFilter(
+                    new Jig.InEdgesFilter(predicate),
+                    new Jig.OutEdgesFilter(predicate)));
+        },
+
+        common: function(v1, v2, depth) {
+            return extend(new Jig.CommonFilter(v1, v2, depth));
+        },
+
+        count: function() {
+            var c = new Jig.CountPipe();
+            filter.apply(c).put(null);
+            return c.getCount();
         },
 
         distinct: function() {
             return extend(new Jig.DistinctFilter());
+        },
+
+        e: function(c) {
+            return extend(new Jig.SingletonFilter(c));
         },
 
         // Gremlin's bothV
@@ -516,12 +536,18 @@ Jig.Generator = function(filter) {
                     new Jig.TailFilter()));
         },
 
+        eval: function() {
+            var p = new Jig.CollectorPipe();
+            filter.apply(p).put(null);
+            return p.getArray();
+        },
+
         head: function() {
             return extend(new Jig.HeadFilter());
         },
 
-        common: function(v1, v2, depth) {
-            return extend(new Jig.CommonFilter(v1, v2, depth));
+        inE: function(predicate) {
+            return extend(new Jig.InEdgesFilter(predicate));
         },
 
         label: function() {
@@ -530,6 +556,14 @@ Jig.Generator = function(filter) {
 
         limit: function(lim) {
             return extend(new Jig.LimitFilter(lim));
+        },
+
+        mean: function() {
+            var c = new Jig.CountPipe();
+            var s = new Jig.SumPipe();
+            var p = new TeePipe(c, s);
+            filter.apply(p).put(null);
+            return s.getSum() / c.getCount();
         },
 
         nearby: function(steps) {
@@ -543,54 +577,8 @@ Jig.Generator = function(filter) {
             //return extend(new Jig.NearbyFilter(steps));
         },
 
-        bothE: function(predicate) {
-            return extend(new Jig.TeeFilter(
-                    new Jig.InEdgesFilter(predicate),
-                    new Jig.OutEdgesFilter(predicate)));
-        },
-
-        inE: function(predicate) {
-            return extend(new Jig.InEdgesFilter(predicate));
-        },
-
         outE: function(predicate) {
             return extend(new Jig.OutEdgesFilter(predicate));
-        },
-
-        tail: function() {
-            return extend(new Jig.TailFilter());
-        },
-
-        triples: function(subject, predicate, object, context) {
-            return extend(new Jig.TriplesFilter(subject, predicate, object, context));
-        },
-
-        ////////////////////////////////
-
-        aggr: function(limit) {
-            var c = new Jig.AggregatePipe(limit);
-            filter.apply(c).put(null);
-            return c.getVector();
-        },
-
-        count: function() {
-            var c = new Jig.CountPipe();
-            filter.apply(c).put(null);
-            return c.getCount();
-        },
-
-        mean: function() {
-            var c = new Jig.CountPipe();
-            var s = new Jig.SumPipe();
-            var p = new TeePipe(c, s);
-            filter.apply(p).put(null);
-            return s.getSum() / c.getCount();
-        },
-
-        eval: function() {
-            var p = new Jig.CollectorPipe();
-            filter.apply(p).put(null);
-            return p.getArray();
         },
 
         path: function() {
@@ -601,6 +589,18 @@ Jig.Generator = function(filter) {
             var c = new Jig.SumPipe();
             filter.apply(c).put(null);
             return c.getSum();
+        },
+
+        tail: function() {
+            return extend(new Jig.TailFilter());
+        },
+
+        triples: function(subject, predicate, object, context) {
+            return extend(new Jig.TriplesFilter(subject, predicate, object, context));
+        },
+
+        v: function(c) {
+            return extend(new Jig.SingletonFilter(c));
         },
 
         ////////////////////////////////
