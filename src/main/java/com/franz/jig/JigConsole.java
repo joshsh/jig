@@ -1,7 +1,7 @@
 package com.franz.jig;
 
-import jline.ConsoleReader;
-import jline.SimpleCompletor;
+import jline.console.ConsoleReader;
+import jline.console.completer.StringsCompleter;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,9 +45,9 @@ public class JigConsole {
                       final OutputStream out) throws IOException {
         this.scriptEngine = scriptEngine;
         this.ps = new PrintStream(out);
-        reader = new ConsoleReader(in, new OutputStreamWriter(out));
+        reader = new ConsoleReader(in, out);
 
-        reader.addCompletor(new SimpleCompletor(new String[]{
+        reader.addCompleter(new StringsCompleter(new String[]{
                 "Jig",
                 "Graph",
                 ".distinct()",

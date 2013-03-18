@@ -17,12 +17,6 @@
             <name>fortytwo.net Maven repository</name>
             <url>http://fortytwo.net/maven2</url>
         </repository>
-        <!-- TODO: is this really necessary? -->
-        <repository>
-            <id>jline</id>
-            <name>JLine Project Repository</name>
-            <url>http://jline.sourceforge.net/m2repo</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -36,11 +30,10 @@
             <artifactId>json</artifactId>
             <version>20090211</version>
         </dependency>
-        <!-- TODO: find a more recent version -->
         <dependency>
             <groupId>jline</groupId>
             <artifactId>jline</artifactId>
-            <version>0.9.9</version>
+            <version>2.10</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
