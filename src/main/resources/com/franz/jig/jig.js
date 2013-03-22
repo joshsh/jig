@@ -537,7 +537,8 @@ Jig.Generator = function(filter) {
             return extend(new Jig.DistinctFilter());
         },
 
-        e: function(c) {
+        // TODO: establish relationship with Gremlin's E step
+        E: function(c) {
             return extend(new Jig.SingletonFilter(c));
         },
 
@@ -611,7 +612,8 @@ Jig.Generator = function(filter) {
             return extend(new Jig.TriplesFilter(subject, predicate, object, context));
         },
 
-        v: function(c) {
+        // the vertex iterator of the graph
+        V: function(c) {
             return extend(new Jig.SingletonFilter(c));
         },
 

@@ -36,7 +36,7 @@ public class JigScriptEngine implements ScriptEngine {
             "bothE",
             "common",
             "distinct",
-            "e",
+            "E",
             "ends",
             "head",
             "inE",
@@ -46,7 +46,7 @@ public class JigScriptEngine implements ScriptEngine {
             "outE",
             "tail",
             "triples",
-            "v"};
+            "V"};
     private static final String[] methods = new String[]{
             "aggr",
             "count",

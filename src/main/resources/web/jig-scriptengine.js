@@ -3,7 +3,7 @@ var STEPS = new Array(
         "bothE",
         "common",
         "distinct",
-        "e",
+        "E",
         "ends",
         "head",
         "inE",
@@ -13,7 +13,7 @@ var STEPS = new Array(
         "outE",
         "tail",
         "triples",
-        "v");
+        "V");
 var METHODS = new Array(
         "aggr",
         "count",
@@ -33,7 +33,7 @@ var KEYWORDS = new Array(
         "bothE",
         "common",
         "distinct",
-        "e",
+        "E",
         "ends",
         "head",
         "inE",
@@ -43,7 +43,7 @@ var KEYWORDS = new Array(
         "outE",
         "tail",
         "triples",
-        "v");
+        "V");
 
 var Jig = {};
 
