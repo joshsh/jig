@@ -1,3 +1,12 @@
+prefix("drugbank", "http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/")
+prefix("drugs", "http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/")
+prefix("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
+
+
+namespaces.register("drugbank", "http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/")
+namespaces.register("drugs", "http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/")
+namespaces.register("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
+
 // Name of the triple store
 store.name
 

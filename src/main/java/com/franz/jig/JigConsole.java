@@ -134,8 +134,23 @@ public class JigConsole {
             JSONArray a = (JSONArray) result;
             // Note: 0-indexed (so as to align result indexes with JavaScript array indexes)
             for (int i = 0; i < a.length(); i++) {
-                ps.println("  [" + i + "]  "
-                        + a.get(i));
+                ps.print("  [" + i + "]  ");
+                Object o = a.get(i);
+                if (o instanceof JSONArray) {
+                    boolean first = true;
+                    JSONArray b = (JSONArray) o;
+                    for (int j = 0; j < b.length(); j++) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            ps.print(", ");
+                        }
+                        ps.print(b.get(j));
+                    }
+                    ps.println("");
+                } else {
+                    ps.println(o);
+                }
                 //    + prettifyResult(a.get(i).toString()));
             }
         } else {

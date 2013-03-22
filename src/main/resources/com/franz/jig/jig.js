@@ -1,5 +1,6 @@
 var Jig = {};
 
+
 /* helper functions ***********************************************************/
 
 function pushCursor(cursor, solutions) {
@@ -119,9 +120,20 @@ Jig.compose = function(up, down) {
     }
 }
 
+String.prototype.endsWith = function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
+
+String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+};
+
+
 /* global objects *************************************************************/
 
 Jig.undirectedUnlabeledGenerator = new Generator(store, neighbors);
+
+Jig.namespaces = {}
 
 
 /* filters ********************************************************************/
@@ -611,6 +623,52 @@ Jig.Generator = function(filter) {
     }
 }
 
+
+/* commands and global functions *****************************************/
+
+prefix = function(pref, uri) {
+    Jig.namespaces[pref] = uri;
+    return uri;
+}
+
+/*
+turtlefy = function(r) {
+    var r1;
+
+    if (null == r) {
+        r1 = null;
+    } else if (Object.prototype.toString.call(r) === '[object Array]') {
+        r1 = [];
+        for (var i in r) {
+            r1.push(turtlefy(r[i]));
+        }
+    } else {
+    //} else if (typeof(r) === 'string') {
+        r = r.toString();
+
+        r1 = null;
+
+        for (var prefix in Jig.namespaces) {
+            var uri = uri + Jig.namespaces[prefix];
+
+            // TODO: this is so inefficient
+            if (r.startsWith("<" + uri)) {
+                r1 = prefix + ":" + r.substring(1 + uri.length, r.length - 1)
+                break;
+            }
+        }
+
+        if (null == r1) {
+            r1 = r;
+        }
+    //} else {
+    //    r1 = r;
+    }
+
+    return r1;
+}
+*/
+
 /* ... ******************************************************************/
 
 Jig.Graph = function() {
@@ -618,3 +676,4 @@ Jig.Graph = function() {
 }
 
 g = new Jig.Graph();
+
