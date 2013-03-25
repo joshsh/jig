@@ -33,6 +33,7 @@ import java.util.LinkedList;
  */
 public class JigScriptEngine implements ScriptEngine {
     private static final String[] steps = new String[]{
+            "_",
             "bothE",
             "common",
             "distinct",

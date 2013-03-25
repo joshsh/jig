@@ -1,5 +1,6 @@
 
 var STEPS = new Array(
+        "_",
         "bothE",
         "common",
         "distinct",
@@ -30,6 +31,7 @@ var KEYWORDS = new Array(
         "path",
         "sum",
         // steps
+        "_",
         "bothE",
         "common",
         "distinct",

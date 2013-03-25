@@ -199,6 +199,19 @@ Jig.HeadFilter = function() {
     }
 }
 
+Jig.IdentityFilter = function() {
+    return {
+        id: "_",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    return solutions.put(arg);
+                }
+            }
+        }
+    }
+}
+
 Jig.InEdgesFilter = function(predicate) {
     return {
         id: "inEdges",
@@ -388,19 +401,6 @@ Jig.TriplesFilter = function(subject, predicate, object, context) {
     }
 }
 
-Jig.TrivialFilter = function() {
-    return {
-        id: "trivial",
-        apply: function(solutions) {
-            return {
-                put: function(arg) {
-                    return solutions.put(arg);
-                }
-            }
-        }
-    }
-}
-
 
 /* pipes **********************************************************************/
 
@@ -511,6 +511,11 @@ Jig.Generator = function(filter) {
     }
 
     return {
+        // emit the incoming object unchanged
+        _: function() {
+            return extend(new Jig.IdentityFilter());
+        },
+
         aggr: function(limit) {
             var c = new Jig.AggregatePipe(limit);
             filter.apply(c).put(null);
@@ -674,7 +679,7 @@ turtlefy = function(r) {
 /* ... ******************************************************************/
 
 Jig.Graph = function() {
-    return new Jig.Generator(new Jig.TrivialFilter());
+    return new Jig.Generator(new Jig.IdentityFilter());
 }
 
 g = new Jig.Graph();
