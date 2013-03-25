@@ -40,6 +40,7 @@ public class JigScriptEngine implements ScriptEngine {
             "E",
             "ends",
             "head",
+            "id",
             "inE",
             "label",
             "limit",

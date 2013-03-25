@@ -205,7 +205,7 @@ Jig.IdFilter = function() {
         apply: function(solutions) {
             return {
                 put: function(arg) {
-                    var s = arg.predicate;
+                    var s = arg.value;
                     return solutions.put(s);
                 }
             }
@@ -578,6 +578,7 @@ Jig.Generator = function(filter) {
             return extend(new Jig.HeadFilter());
         },
 
+        // the identifier of the element
         id: function() {
             return extend(new Jig.IdFilter());
         },
