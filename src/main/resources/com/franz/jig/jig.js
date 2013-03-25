@@ -199,6 +199,20 @@ Jig.HeadFilter = function() {
     }
 }
 
+Jig.IdFilter = function() {
+    return {
+        id: "id",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var s = arg.predicate;
+                    return solutions.put(s);
+                }
+            }
+        }
+    }
+}
+
 Jig.IdentityFilter = function() {
     return {
         id: "_",
@@ -562,6 +576,10 @@ Jig.Generator = function(filter) {
 
         head: function() {
             return extend(new Jig.HeadFilter());
+        },
+
+        id: function() {
+            return extend(new Jig.IdFilter());
         },
 
         inE: function(predicate) {
