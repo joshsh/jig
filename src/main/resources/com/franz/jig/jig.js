@@ -415,6 +415,33 @@ Jig.TriplesFilter = function(subject, predicate, object, context) {
     }
 }
 
+Jig.VertexFilter = function(predicate, object) {
+    return {
+        id: "V",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var cursor = store.getTriples(null, predicate, object, null);
+
+                    var t = cursor.next();
+                    while (null != t) {
+
+                        if (!solutions.put(t.subject)) {
+                            cursor.close();
+                            return false;
+                        }
+
+                        t = cursor.next();
+                    }
+
+                    cursor.close();
+                    return true;
+                }
+            }
+        }
+    }
+}
+
 
 /* pipes **********************************************************************/
 
@@ -587,6 +614,7 @@ Jig.Generator = function(filter) {
             return extend(new Jig.InEdgesFilter(predicate));
         },
 
+        // the label of the edge
         label: function() {
             return extend(new Jig.LabelFilter());
         },
@@ -637,8 +665,14 @@ Jig.Generator = function(filter) {
         },
 
         // the vertex iterator of the graph
-        V: function(c) {
-            return extend(new Jig.SingletonFilter(c));
+        V: function(arg1, arg2) {
+            if (null == arg2) {
+                // V(id)
+                return extend(new Jig.SingletonFilter(arg1));
+            } else {
+                // V(key, value)
+                return extend(new Jig.VertexFilter(arg1, arg2));
+            }
         },
 
         ////////////////////////////////

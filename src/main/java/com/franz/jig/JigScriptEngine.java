@@ -48,6 +48,7 @@ public class JigScriptEngine implements ScriptEngine {
             "outE",
             "tail",
             "triples",
+                                "vertex",
             "V"};
     private static final String[] methods = new String[]{
             "aggr",
