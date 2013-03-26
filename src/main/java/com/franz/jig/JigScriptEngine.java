@@ -45,10 +45,10 @@ public class JigScriptEngine implements ScriptEngine {
             "label",
             "limit",
             "nearby",
+            "out",
             "outE",
             "tail",
             "triples",
-                                "vertex",
             "V"};
     private static final String[] methods = new String[]{
             "aggr",

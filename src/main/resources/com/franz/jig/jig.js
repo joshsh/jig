@@ -111,6 +111,7 @@ Jig.toNumber = function(r) {
     return 0;
 }
 
+// composes one pipeline with another
 Jig.compose = function(up, down) {
     return {
         id: "c(" + up.id + ", " + down.id + ")",
@@ -347,7 +348,7 @@ Jig.OptionFilter = function(other) {
 
 Jig.OutEdgesFilter = function(predicate) {
     return {
-        id: "outEdges",
+        id: "outE",
         apply: function(solutions) {
             return {
                 put: function(arg) {
@@ -358,6 +359,21 @@ Jig.OutEdgesFilter = function(predicate) {
         }
     }
 }
+
+/*
+Jig.VerticesVerticesFilter = function() {
+   return {
+       id: "out",
+       apply: function(solutions) {
+           return {
+               put: function(arg) {
+                   var c = store.getTriples(arg, null, null, null);
+                   return pushCursor(c, solutions);
+               }
+           }
+       }
+   }
+}*/
 
 Jig.SingletonFilter = function(c) {
     return {
@@ -642,6 +658,15 @@ Jig.Generator = function(filter) {
             //return extend(new Jig.NearbyFilter(steps));
         },
 
+        // out adjacent vertices to the vertex
+        // TODO: use optional labels
+        out: function() {
+            var up = Jig.OutEdgesFilter(null);
+            var down = new Jig.HeadFilter();
+            return extend(Jig.compose(up, down));
+        },
+
+        // TODO: implement JavaScript's "arguments" object in the AG JavaScript API to enable varargs
         outE: function(predicate) {
             return extend(new Jig.OutEdgesFilter(predicate));
         },
