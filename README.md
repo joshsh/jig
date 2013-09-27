@@ -1,6 +1,11 @@
+![Jig logo|width=107px|height=100px](https://github.com/joshsh/jig/wiki/graphics/jig-logo-medium.png)
+
 Jig (JavaScript-based interface for graph traversal) is a graph-based programming language in the spirit of [Gremlin](https://github.com/tinkerpop/gremlin/wiki) or [Ripple](https://github.com/joshsh/ripple/wiki), but specifically geared towards [AllegroGraph](http://www.franz.com/agraph/allegrograph/) and using JavaScript syntax.
 
-All Jig expressions are valid JavaScript, but behind the scenes, they are compiled to [Allegro Common Lisp](http://www.franz.com/products/allegrocl/), which as executes efficiently as possible in the AllegroGraph server environment.  In this way, you can easily explore a graph or incrementally build up simple programs at the [REPL](http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop), but you also have the power of the Lisp compiler if you need it for more complex and computationally intensive tasks.
+All Jig expressions are valid JavaScript, but behind the scenes, they are compiled to [Allegro Common Lisp](http://www.franz.com/products/allegrocl/), which executes as efficiently as possible in the AllegroGraph server environment.  In this way, you can easily explore a graph or incrementally build up simple programs at the [REPL](http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop), but you also have the power of the Lisp compiler if you need it for more complex and computationally intensive tasks.
+
+Starting a Jig session:
+* [Getting started](https://github.com/joshsh/jig/wiki/Getting-Started)
 
 Syntax reference:
 * [Jig steps](https://github.com/joshsh/jig/wiki/Jig-steps)
