@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.franz.jig</groupId>
     <artifactId>jig</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Jig: JavaScript interface for graph traversal</name>
     <description>Jig is a JavaScript-based language for fast traversal of property graphs</description>
@@ -16,12 +16,6 @@
             <id>fortytwo</id>
             <name>fortytwo.net Maven repository</name>
             <url>http://fortytwo.net/maven2</url>
-        </repository>
-        <!-- TODO: is this really necessary? -->
-        <repository>
-            <id>jline</id>
-            <name>JLine Project Repository</name>
-            <url>http://jline.sourceforge.net/m2repo</url>
         </repository>
     </repositories>
 
@@ -36,11 +30,10 @@
             <artifactId>json</artifactId>
             <version>20090211</version>
         </dependency>
-        <!-- TODO: find a more recent version -->
         <dependency>
             <groupId>jline</groupId>
             <artifactId>jline</artifactId>
-            <version>0.9.9</version>
+            <version>2.10</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

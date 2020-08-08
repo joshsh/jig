@@ -11,16 +11,13 @@ import java.util.Properties;
  */
 public class Jig {
     private static final String
-            ENDPOINT = "com.franz.jig.allegro.endpoint",
-            USERNAME = "com.franz.jig.allegro.username",
-            PASSWORD = "com.franz.jig.allegro.password";
+            SESSION = "com.franz.jig.session",
+            USERNAME = "com.franz.jig.username",
+            PASSWORD = "com.franz.jig.password";
 
-    // Note: this property is used outside of Jig (e.g. in the experimental Jig Console) to refer to its current version
-    public static final String VERSION = "1.0-SNAPSHOT";
-
-    public static JigConsole loadConsole(final String propsFile,
-                                         final InputStream in,
-                                         final OutputStream out) throws Exception {
+    private static JigConsole loadConsole(final String propsFile,
+                                          final InputStream in,
+                                          final OutputStream out) throws Exception {
         File f = new File(propsFile);
         Properties config = new Properties();
         InputStream is = new FileInputStream(f);
@@ -30,11 +27,11 @@ public class Jig {
             is.close();
         }
 
-        String endpoint = config.getProperty(ENDPOINT);
+        String session = config.getProperty(SESSION);
         String userName = config.getProperty(USERNAME);
         String password = config.getProperty(PASSWORD);
 
-        JigScriptEngine e = new JigScriptEngine(endpoint, userName, password);
+        JigScriptEngine e = new JigScriptEngine(session, userName, password);
         e.initialize();
 
         return new JigConsole(e, in, out);

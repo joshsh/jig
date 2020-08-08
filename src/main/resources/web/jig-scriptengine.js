@@ -1,19 +1,22 @@
 
 var STEPS = new Array(
+        "_",
         "bothE",
         "common",
         "distinct",
-        "e",
+        "E",
         "ends",
         "head",
+        "id",
         "inE",
         "label",
         "limit",
         "nearby",
+        "out",
         "outE",
         "tail",
         "triples",
-        "v");
+        "V");
 var METHODS = new Array(
         "aggr",
         "count",
@@ -30,20 +33,23 @@ var KEYWORDS = new Array(
         "path",
         "sum",
         // steps
+        "_",
         "bothE",
         "common",
         "distinct",
-        "e",
+        "E",
         "ends",
         "head",
+        "id",
         "inE",
         "label",
         "limit",
         "nearby",
+        "out",
         "outE",
         "tail",
         "triples",
-        "v");
+        "V");
 
 var Jig = {};
 

@@ -1,5 +1,6 @@
 var Jig = {};
 
+
 /* helper functions ***********************************************************/
 
 function pushCursor(cursor, solutions) {
@@ -110,6 +111,7 @@ Jig.toNumber = function(r) {
     return 0;
 }
 
+// composes one pipeline with another
 Jig.compose = function(up, down) {
     return {
         id: "c(" + up.id + ", " + down.id + ")",
@@ -119,9 +121,13 @@ Jig.compose = function(up, down) {
     }
 }
 
-/* global objects *************************************************************/
+String.prototype.endsWith = function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
 
-Jig.undirectedUnlabeledGenerator = new Generator(store, neighbors);
+String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+};
 
 
 /* filters ********************************************************************/
@@ -181,6 +187,33 @@ Jig.HeadFilter = function() {
                 put: function(arg) {
                     var s = arg.object;
                     return solutions.put(s);
+                }
+            }
+        }
+    }
+}
+
+Jig.IdFilter = function() {
+    return {
+        id: "id",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    var s = arg.value;
+                    return solutions.put(s);
+                }
+            }
+        }
+    }
+}
+
+Jig.IdentityFilter = function() {
+    return {
+        id: "_",
+        apply: function(solutions) {
+            return {
+                put: function(arg) {
+                    return solutions.put(arg);
                 }
             }
         }
@@ -308,7 +341,7 @@ Jig.OptionFilter = function(other) {
 
 Jig.OutEdgesFilter = function(predicate) {
     return {
-        id: "outEdges",
+        id: "outE",
         apply: function(solutions) {
             return {
                 put: function(arg) {
@@ -319,6 +352,21 @@ Jig.OutEdgesFilter = function(predicate) {
         }
     }
 }
+
+/*
+Jig.VerticesVerticesFilter = function() {
+   return {
+       id: "out",
+       apply: function(solutions) {
+           return {
+               put: function(arg) {
+                   var c = store.getTriples(arg, null, null, null);
+                   return pushCursor(c, solutions);
+               }
+           }
+       }
+   }
+}*/
 
 Jig.SingletonFilter = function(c) {
     return {
@@ -376,13 +424,27 @@ Jig.TriplesFilter = function(subject, predicate, object, context) {
     }
 }
 
-Jig.TrivialFilter = function() {
+Jig.VertexFilter = function(predicate, object) {
     return {
-        id: "trivial",
+        id: "V",
         apply: function(solutions) {
             return {
                 put: function(arg) {
-                    return solutions.put(arg);
+                    var cursor = store.getTriples(null, predicate, object, null);
+
+                    var t = cursor.next();
+                    while (null != t) {
+
+                        if (!solutions.put(t.subject)) {
+                            cursor.close();
+                            return false;
+                        }
+
+                        t = cursor.next();
+                    }
+
+                    cursor.close();
+                    return true;
                 }
             }
         }
@@ -499,6 +561,11 @@ Jig.Generator = function(filter) {
     }
 
     return {
+        // emit the incoming object unchanged
+        _: function() {
+            return extend(new Jig.IdentityFilter());
+        },
+
         aggr: function(limit) {
             var c = new Jig.AggregatePipe(limit);
             filter.apply(c).put(null);
@@ -525,7 +592,8 @@ Jig.Generator = function(filter) {
             return extend(new Jig.DistinctFilter());
         },
 
-        e: function(c) {
+        // TODO: establish relationship with Gremlin's E step
+        E: function(c) {
             return extend(new Jig.SingletonFilter(c));
         },
 
@@ -546,10 +614,16 @@ Jig.Generator = function(filter) {
             return extend(new Jig.HeadFilter());
         },
 
+        // the identifier of the element
+        id: function() {
+            return extend(new Jig.IdFilter());
+        },
+
         inE: function(predicate) {
             return extend(new Jig.InEdgesFilter(predicate));
         },
 
+        // the label of the edge
         label: function() {
             return extend(new Jig.LabelFilter());
         },
@@ -577,6 +651,15 @@ Jig.Generator = function(filter) {
             //return extend(new Jig.NearbyFilter(steps));
         },
 
+        // out adjacent vertices to the vertex
+        // TODO: use optional labels
+        out: function() {
+            var up = Jig.OutEdgesFilter(null);
+            var down = new Jig.HeadFilter();
+            return extend(Jig.compose(up, down));
+        },
+
+        // TODO: implement JavaScript's "arguments" object in the AG JavaScript API to enable varargs
         outE: function(predicate) {
             return extend(new Jig.OutEdgesFilter(predicate));
         },
@@ -599,8 +682,15 @@ Jig.Generator = function(filter) {
             return extend(new Jig.TriplesFilter(subject, predicate, object, context));
         },
 
-        v: function(c) {
-            return extend(new Jig.SingletonFilter(c));
+        // the vertex iterator of the graph
+        V: function(arg1, arg2) {
+            if (null == arg2) {
+                // V(id)
+                return extend(new Jig.SingletonFilter(arg1));
+            } else {
+                // V(key, value)
+                return extend(new Jig.VertexFilter(arg1, arg2));
+            }
         },
 
         ////////////////////////////////
@@ -611,10 +701,60 @@ Jig.Generator = function(filter) {
     }
 }
 
-/* ... ******************************************************************/
+
+/* commands and global functions *****************************************/
+
+prefix = function(pref, uri) {
+    Jig.namespaces[pref] = uri;
+    return uri;
+}
+
+/*
+turtlefy = function(r) {
+    var r1;
+
+    if (null == r) {
+        r1 = null;
+    } else if (Object.prototype.toString.call(r) === '[object Array]') {
+        r1 = [];
+        for (var i in r) {
+            r1.push(turtlefy(r[i]));
+        }
+    } else {
+    //} else if (typeof(r) === 'string') {
+        r = r.toString();
+
+        r1 = null;
+
+        for (var prefix in Jig.namespaces) {
+            var uri = uri + Jig.namespaces[prefix];
+
+            // TODO: this is so inefficient
+            if (r.startsWith("<" + uri)) {
+                r1 = prefix + ":" + r.substring(1 + uri.length, r.length - 1)
+                break;
+            }
+        }
+
+        if (null == r1) {
+            r1 = r;
+        }
+    //} else {
+    //    r1 = r;
+    }
+
+    return r1;
+}
+*/
+
+/* global objects *************************************************************/
+
+Jig.undirectedUnlabeledGenerator = new Jig.Generator(store, neighbors);
+
+Jig.namespaces = {}
 
 Jig.Graph = function() {
-    return new Jig.Generator(new Jig.TrivialFilter());
+    return new Jig.Generator(new Jig.IdentityFilter());
 }
 
 g = new Jig.Graph();
