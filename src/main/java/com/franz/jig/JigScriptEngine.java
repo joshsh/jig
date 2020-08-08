@@ -72,26 +72,23 @@ public class JigScriptEngine implements ScriptEngine {
     private final String password;
     private final HttpClient client;
 
-    public JigScriptEngine(final String endpoint,
+    public JigScriptEngine(final String session,
                            final String userName,
                            final String password) {
-        this.endpoint = endpoint;
+        this.endpoint = fixSession(session) + "/eval";
         this.userName = userName;
         this.password = password;
-        //System.out.println("using credentials: (" + userName + ", " + password + ")");
         client = createHttpClient();
     }
 
     public Object eval(final String script,
                        final ScriptContext context) throws ScriptException {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public Object eval(final Reader reader,
                        final ScriptContext context) throws ScriptException {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public Object eval(final String script) throws ScriptException {
@@ -102,6 +99,26 @@ public class JigScriptEngine implements ScriptEngine {
         } catch (JSONException e) {
             throw new ScriptException(e);
         }
+    }
+
+    private String fixSession(final String session) {
+        String example = "http://example.org/catalogs/mycat/repositories/myrepo/session/9091/sessions/23593b0f-eab5-3b04-4d64-003048fde8f8";
+
+        if (!session.startsWith("http")) {
+            throw new IllegalArgumentException("session identifier must be a complete URL." +
+                    " Valid session URLs look like '" + example + "'");
+        }
+        if (!session.contains("repositories") || !session.contains("session")) {
+            throw new IllegalArgumentException("invalid session URL." +
+                    " Valid session URLs look like '" + example + "'");
+        }
+
+        // Session URLs provided by AGWebView for repositories in the default catalog
+        // contain a "#" character, but the URL expected for POST must exclude the "#".
+        int i = session.indexOf('#');
+        return i > -1
+                ? session.substring(0, i) + session.substring(i + 1)
+                : session;
     }
 
     private String transformScript(final String script) {
@@ -125,8 +142,6 @@ public class JigScriptEngine implements ScriptEngine {
             }
         }
 
-        //r = "turtlefy(" + r + ")";
-        //System.out.println("[ r = " + r + "]");
         return r;
     }
 
@@ -157,58 +172,51 @@ public class JigScriptEngine implements ScriptEngine {
     }
 
     public Object eval(final Reader reader) throws ScriptException {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public Object eval(final String script,
                        final Bindings bindings) throws ScriptException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     public Object eval(final Reader reader,
                        final Bindings bindings) throws ScriptException {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void put(final String key,
                     final Object value) {
-        // TODO
+        throw new UnsupportedOperationException();
     }
 
     public Object get(final String key) {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public Bindings getBindings(final int scope) {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void setBindings(final Bindings bindings,
                             final int i) {
-        // TODO
+        throw new UnsupportedOperationException();
     }
 
     public Bindings createBindings() {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public ScriptContext getContext() {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void setContext(final ScriptContext context) {
-        // TODO
+        throw new UnsupportedOperationException();
     }
 
     public ScriptEngineFactory getFactory() {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     private static HttpClient createHttpClient() {
@@ -216,26 +224,32 @@ public class JigScriptEngine implements ScriptEngine {
         return new DefaultHttpClient();
     }
 
-    private Object issueRequest(final String script) throws IOException, JSONException {
+    private Object issueRequest(final String script) throws IOException, JSONException, ScriptException {
         HttpPost request = new HttpPost(endpoint);
         request.setHeader("Content-Type", "text/javascript");
+        request.setHeader("Accept", "application/json");
         request.setEntity(new StringEntity(script));
         String auth = new String(Base64.encodeBase64((userName + ":" + password).getBytes()));
         request.setHeader("Authorization", "Basic " + auth);
 
         //long before = new Date().getTime();
         HttpResponse response = client.execute(request);
-        long after = new Date().getTime();
+        //long after = new Date().getTime();
         //System.out.println("[request took " + (after - before) + "ms]");
-        int responseCode = response.getStatusLine().getStatusCode();
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         response.getEntity().writeTo(bos);
-        String s = bos.toString();
-        //System.out.println("here is the result: " + s);
+        String result = bos.toString();
+
+        int responseCode = response.getStatusLine().getStatusCode();
+        if (responseCode != 200) {
+            throw new ScriptException("Jig request failed with error code " + responseCode +
+                    ": " + result);
+        }
+        //System.out.println("here is the result: " + result);
         //System.out.println("response: " + responseCode);
 
-        return interpretResponse(s.trim());
+        return interpretResponse(result.trim());
     }
 
     private Object interpretResponse(final String s) throws JSONException {

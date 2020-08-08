@@ -130,13 +130,6 @@ String.prototype.startsWith = function (str){
 };
 
 
-/* global objects *************************************************************/
-
-Jig.undirectedUnlabeledGenerator = new Generator(store, neighbors);
-
-Jig.namespaces = {}
-
-
 /* filters ********************************************************************/
 
 Jig.CommonFilter = function(v1, v2, depth) {
@@ -754,11 +747,14 @@ turtlefy = function(r) {
 }
 */
 
-/* ... ******************************************************************/
+/* global objects *************************************************************/
+
+Jig.undirectedUnlabeledGenerator = new Jig.Generator(store, neighbors);
+
+Jig.namespaces = {}
 
 Jig.Graph = function() {
     return new Jig.Generator(new Jig.IdentityFilter());
 }
 
 g = new Jig.Graph();
-

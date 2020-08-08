@@ -38,7 +38,6 @@ public class JigConsole {
     }
 
     private String previous = "";
-    private int lineNumber = 0;
 
     public JigConsole(final ScriptEngine scriptEngine,
                       final InputStream in,
@@ -68,10 +67,7 @@ public class JigConsole {
     }
 
     public boolean readLine() throws ScriptException, IOException, JSONException {
-        ++lineNumber;
-
         String prefix = "jig)  ";
-//        String prefix = "" + lineNumber + ")  ";
         String line = reader.readLine(prefix);
 
         return null != line && parseLine(line, true);
@@ -111,19 +107,20 @@ public class JigConsole {
 
     private boolean executeScript(final String script,
                                   final boolean padOutput) throws ScriptException, JSONException {
-        //long before = new Date().getTime();
-
-        if (padOutput) {
-            ps.println("");
-        }
-        Object result = scriptEngine.eval(script.trim());
-        showResult(result);
         if (padOutput) {
             ps.println("");
         }
 
-        //long after = new Date().getTime();
-        //System.out.println("[script took " + (after - before) + "ms]");
+        try {
+            Object result = scriptEngine.eval(script.trim());
+
+            showResult(result);
+            if (padOutput) {
+                ps.println("");
+            }
+        } catch (ScriptException e) {
+            ps.println("ERROR: " + e.getMessage() + "\n");
+        }
 
         // TODO: provide a "quit" command
         return true;
@@ -151,25 +148,12 @@ public class JigConsole {
                 } else {
                     ps.println(o);
                 }
-                //    + prettifyResult(a.get(i).toString()));
             }
         } else {
             ps.println("  [0]  " + result);
         }
     }
 
-    static final String test = "  [0]  [\"<http://data.linkedct.org/resource/intervention/41635>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01029>\"]\n";// +
-
-    /*   "  [1]  [\"<http://data.linkedct.org/resource/intervention/41600>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01234>\"]\n" +
-    "  [2]  [\"<http://data.linkedct.org/resource/intervention/41582>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01229>\"]\n" +
-    "  [3]  [\"<http://data.linkedct.org/resource/intervention/41553>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01202>\"]\n" +
-    "  [4]  [\"<http://data.linkedct.org/resource/intervention/41551>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01202>\"]\n" +
-    "  [5]  [\"<http://data.linkedct.org/resource/intervention/41550>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01202>\"]\n" +
-    "  [6]  [\"<http://data.linkedct.org/resource/intervention/41528>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01229>\"]\n" +
-    "  [7]  [\"<http://data.linkedct.org/resource/intervention/41526>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00959>\"]\n" +
-    "  [8]  [\"<http://data.linkedct.org/resource/intervention/41518>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00958>\"]\n" +
-    "  [9]  [\"<http://data.linkedct.org/resource/intervention/41501>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00959>\"]";
-    */
     private static String prettifyResult(final String before) {
         StringBuilder sb = new StringBuilder();
         int i = 0, j;
@@ -208,6 +192,8 @@ public class JigConsole {
             }
         }
     }
+
+    static final String test = "  [0]  [\"<http://data.linkedct.org/resource/intervention/41635>\",\"<http://www.w3.org/2002/07/owl#sameAs>\",\"<http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB01029>\"]\n";// +
 
     public static void main(final String[] args) throws Exception {
         System.out.println(prettifyResult(test));
