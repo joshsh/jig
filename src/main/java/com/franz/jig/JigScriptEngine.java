@@ -26,7 +26,9 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * @author Joshua Shinavier (http://fortytwo.net)
@@ -49,7 +51,8 @@ public class JigScriptEngine implements ScriptEngine {
             "outE",
             "tail",
             "triples",
-            "V"};
+            "V",
+    };
     private static final String[] methods = new String[]{
             "aggr",
             "count",
@@ -58,6 +61,10 @@ public class JigScriptEngine implements ScriptEngine {
             "path",
             "sum",
     };
+    private static final Map<String, String> aliases = new HashMap<String, String>() {{
+        put("e", "E");
+        put("v", "V");
+    }};
 
     private static final Collection<String> keywords;
 
@@ -133,6 +140,13 @@ public class JigScriptEngine implements ScriptEngine {
             r = r.replaceAll("[.]" + k + "$", "." + k + "()");
             //r = r.replaceAll("[.]" + k + "\\s*;", "." + k + "();");
         }
+        for (String k : aliases.keySet()) {
+            r = r.replaceAll("[.]" + k + "[.]", "." + aliases.get(k) + "().");
+            r = r.replaceAll("[.]" + k + "\\[", "." + aliases.get(k) + "()[");
+            r = r.replaceAll("[.]" + k + "$", "." + aliases.get(k) + "()");
+            //r = r.replaceAll("[.]" + k + "\\s*;", "." + aliases.get(k) + "();");
+            r = r.replaceAll("[.]" + k + "\\(", "." + aliases.get(k) + "(");
+        }
         r = cleanParens(r);
         r = cleanBrackets(r);
         for (String step : steps) {
@@ -141,6 +155,8 @@ public class JigScriptEngine implements ScriptEngine {
                 break;
             }
         }
+
+        //System.out.println("transformed script: " + r);
 
         return r;
     }
